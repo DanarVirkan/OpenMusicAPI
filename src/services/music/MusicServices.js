@@ -1,6 +1,7 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const { mapDBsongsToModel } = require('../../utils');
+const NotFoundError = require('../../exceptions/NotFoundError');
 
 class MusicService {
     constructor() {
@@ -41,7 +42,7 @@ class MusicService {
         const result = await this._pool.query(query);
 
         if (!result.rows.length) {
-
+            throw new NotFoundError('id tidak ditemukan', 404);
         }
     }
 
@@ -52,7 +53,7 @@ class MusicService {
         };
         const result = await this._pool.query(query);
         if (!result.rows.length) {
-
+            throw new NotFoundError('id tidak ditemukan', 404);
         }
     }
 

@@ -1,4 +1,5 @@
 const ClientError = require('../../exceptions/ClientError');
+const NotFoundError = require('../../exceptions/NotFoundError');
 class MusicHandler {
     constructor(service, validator) {
         this._service = service;
@@ -50,14 +51,22 @@ class MusicHandler {
         const id = request.params.songId
         try {
             const song = await this._service.getSongById(id)
+            if (!song) {
+                throw new NotFoundError(`gagal mendapatkan lagu dengan id ${id}`);
+            }
             return h.response({
                 status: "success",
                 data: {
                     song
                 }
-
             }).code(200);
-        } catch {
+        } catch (error) {
+            if (error instanceof NotFoundError) {
+                return h.response({
+                    status: "fail",
+                    message: error.message
+                }).code(404);
+            }
             return h.response({
                 status: "error",
                 message: "lagu tidak berhasil didapatkan"
@@ -77,7 +86,13 @@ class MusicHandler {
                 message: "lagu berhasil diperbarui"
             }).code(200);
         } catch (error) {
-            if (error instanceof ClientError) {
+            if (error instanceof NotFoundError) {
+                return h.response({
+                    status: "fail",
+                    message: error.message
+                }).code(404);
+
+            } else if (error instanceof ClientError) {
                 return h.response({
                     status: "fail",
                     message: "payload tidak sesuai"
@@ -99,7 +114,13 @@ class MusicHandler {
                 status: "success",
                 message: "lagu berhasil dihapus"
             }).code(200);
-        } catch {
+        } catch (error) {
+            if (error instanceof NotFoundError) {
+                return h.response({
+                    status: "fail",
+                    message: error.message
+                }).code(404);
+            }
             return h.response({
                 status: "error",
                 message: "lagu tidak berhasil dihapus"
