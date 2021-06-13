@@ -9,7 +9,11 @@ class MusicService {
   }
 
   async addSong({
-    title, year, performer, genre, duration,
+    title,
+    year,
+    performer,
+    genre,
+    duration,
   }) {
     const id = `song-${nanoid(16)}`;
     const createdAt = new Date().toISOString();
@@ -37,7 +41,11 @@ class MusicService {
   }
 
   async updateSongById(id, {
-    title, year, performer, genre, duration,
+    title,
+    year,
+    performer,
+    genre,
+    duration,
   }) {
     const updated = new Date().toISOString();
     const query = {
@@ -47,7 +55,7 @@ class MusicService {
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new NotFoundError('id tidak ditemukan', 404);
+      throw new NotFoundError('id tidak ditemukan');
     }
   }
 
@@ -58,7 +66,7 @@ class MusicService {
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new NotFoundError('id tidak ditemukan', 404);
+      throw new NotFoundError('id tidak ditemukan');
     }
   }
 }
