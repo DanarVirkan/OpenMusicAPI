@@ -1,3 +1,4 @@
+const ClientError = require('../../exceptions/ClientError');
 class MusicHandler {
     constructor(service, validator) {
         this._service = service;
@@ -22,11 +23,11 @@ class MusicHandler {
                 }
             }).code(201);
         } catch (error) {
-            console.log(error);
-            return h.response({
-                status: "error",
-                message: "Lagu tidak berhasil ditambahkan"
-            }).code(500);
+            if (error instanceof ClientError)
+                return h.response({
+                    status: "error",
+                    message: "Lagu tidak berhasil ditambahkan"
+                }).code(500);
         }
     }
 
