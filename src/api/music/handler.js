@@ -23,11 +23,16 @@ class MusicHandler {
                 }
             }).code(201);
         } catch (error) {
-            if (error instanceof ClientError)
+            if (error instanceof ClientError) {
                 return h.response({
-                    status: "error",
-                    message: "Lagu tidak berhasil ditambahkan"
-                }).code(500);
+                    status: "fail",
+                    message: "payload tidak sesuai"
+                }).code(400);
+            }
+            return h.response({
+                status: "error",
+                message: "Lagu tidak berhasil ditambahkan"
+            }).code(500);
         }
     }
 
@@ -71,8 +76,13 @@ class MusicHandler {
                 status: "success",
                 message: "lagu berhasil diperbarui"
             }).code(200);
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            if (error instanceof ClientError) {
+                return h.response({
+                    status: "fail",
+                    message: "payload tidak sesuai"
+                }).code(400);
+            }
             return h.response({
                 status: "error",
                 message: "lagu tidak berhasil diperbarui"
