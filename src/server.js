@@ -7,8 +7,8 @@ const MusicValidator = require('./validator/music');
 const init = async () => {
   const musicService = new MusicService();
   const server = Hapi.server({
-    port: 5000,
-    host: process.env.NODE_ENV !== 'production' ? 'localhost' : '0.0.0.0',
+    port: process.env.PORT,
+    host: process.env.HOST,
     routes: {
       cors: {
         origin: ['*'],
