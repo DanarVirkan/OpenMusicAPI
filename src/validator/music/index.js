@@ -1,7 +1,7 @@
 const { MusicPayloadSchema } = require("./schema");
 
 const MusicValidator = {
-    validateNotePayload: (payload) => {
+    validateMusicPayload: (payload) => {
         const validationResult = MusicPayloadSchema.validate(payload);
         if (validationResult.error) {
             throw new Error(validationResult.error.message);
