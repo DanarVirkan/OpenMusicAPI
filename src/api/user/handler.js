@@ -8,7 +8,7 @@ class UserHandler {
         const { username, password, fullname } = request.payload;
         try {
             const id = await this._service.addUser({ username, password, fullname });
-            h.response({
+            return h.response({
                 status: "success",
                 message: "User berhasil ditambahkan",
                 data: {
@@ -16,7 +16,7 @@ class UserHandler {
                 }
             }).code(201);
         } catch (error) {
-            h.response({
+            return h.response({
                 status: 'error',
                 message: '<apa pun selama tidak kosong>'
             }).code(500);
