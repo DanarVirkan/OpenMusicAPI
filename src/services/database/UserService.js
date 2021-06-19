@@ -33,5 +33,22 @@ class UserService {
             throw new InvariantError('Username sudah dipakai');
         }
     }
+
+    async verifyUserCredentials(username, password) {
+        const query = {
+            text: 'SELECT id, password FROM music_user WHERE username = $1',
+            values: [username]
+        };
+        const result = await this._pool.query(query);
+        if (!result.rowCount) {
+            throw new InvariantError('Kredensial yang anda berikan salah');
+        }
+        const { id, password: hashedPassword } = result.rows[0];
+        const match = bcrypt.compare(password, hashedPassword);
+        if (!match) {
+            throw new InvariantError('Kredensial yang anda berikan salah');
+        }
+        return id;
+    }
 }
 module.exports = UserService;
