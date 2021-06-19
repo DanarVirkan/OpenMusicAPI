@@ -1,5 +1,6 @@
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
+const Jwt = require('@hapi/jwt');
 const music = require('./api/music');
 const MusicService = require('./services/database/MusicService');
 const MusicValidator = require('./validator/music');
@@ -26,6 +27,10 @@ const init = async () => {
       },
     },
   });
+
+  await server.register([{
+    plugin: Jwt,
+  }]);
 
   await server.register([{
     plugin: music,
