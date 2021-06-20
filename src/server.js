@@ -14,10 +14,16 @@ const AuthService = require('./services/database/AuthService');
 const AuthValidator = require('./validator/auth');
 const tokenManager = require('./tokenize/TokenManager');
 
+const playlist = require('./api/playlist');
+const PlaylistService = require('./services/database/PlaylistService');
+const PlaylistValidator = require('./validator/playlist');
+
 const init = async () => {
   const musicService = new MusicService();
   const userService = new UserService();
   const authService = new AuthService();
+  const playlistService = new PlaylistService();
+
   const server = Hapi.server({
     port: process.env.PORT,
     host: process.env.HOST,
@@ -31,6 +37,22 @@ const init = async () => {
   await server.register([{
     plugin: Jwt,
   }]);
+
+  server.auth.strategy('music_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
+      },
+    }),
+  });
 
   await server.register([{
     plugin: music,
@@ -51,6 +73,12 @@ const init = async () => {
       userService,
       tokenManager,
       validator: AuthValidator,
+    },
+  }, {
+    plugin: playlist,
+    options: {
+      service: playlistService,
+      validator: PlaylistValidator,
     },
   }]).catch((err) => console.log(err));
 
