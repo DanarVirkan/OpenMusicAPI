@@ -1,3 +1,5 @@
+const { catchFunction } = require('../../utils');
+
 class UserHandler {
   constructor(service, validator) {
     this._service = service;
@@ -6,8 +8,9 @@ class UserHandler {
   }
 
   async postUserHandler(request, h) {
-    const { username, password, fullname } = request.payload;
     try {
+      this._validator.validateUserPayload(request.payload);
+      const { username, password, fullname } = request.payload;
       const id = await this._service.addUser({ username, password, fullname });
       return h.response({
         status: 'success',
@@ -17,10 +20,7 @@ class UserHandler {
         },
       }).code(201);
     } catch (error) {
-      return h.response({
-        status: 'error',
-        message: '<apa pun selama tidak kosong>',
-      }).code(500);
+      return catchFunction(error, h);
     }
   }
 }

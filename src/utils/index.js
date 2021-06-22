@@ -1,5 +1,6 @@
 const ClientError = require('../exceptions/ClientError');
 
+const mapDBplaylistsToModel = ({ id, name, username }) => ({ id, name, username });
 const mapDBsongsToModel = ({ id, title, performer }) => ({ id, title, performer });
 const catchFunction = (error, h) => {
   if (error instanceof ClientError) {
@@ -14,4 +15,4 @@ const catchFunction = (error, h) => {
   }).code(500);
 };
 
-module.exports = { mapDBsongsToModel, catchFunction };
+module.exports = { mapDBplaylistsToModel, mapDBsongsToModel, catchFunction };

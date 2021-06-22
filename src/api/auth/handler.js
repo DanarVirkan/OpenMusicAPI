@@ -1,4 +1,4 @@
-const ClientError = require('../../exceptions/ClientError');
+const { catchFunction } = require('../../utils');
 
 class AuthHandler {
   constructor(authService, userService, tokenManager, validator) {
@@ -28,16 +28,7 @@ class AuthHandler {
         },
       }).code(201);
     } catch (error) {
-      if (error instanceof ClientError) {
-        return h.response({
-          status: 'fail',
-          message: error.message,
-        }).code(error.statusCode);
-      }
-      return h.response({
-        status: 'error',
-        message: 'Maaf, terjadi kegagalan pada server kami.',
-      }).code(500);
+      return catchFunction(error, h);
     }
   }
 
@@ -55,11 +46,8 @@ class AuthHandler {
           accessToken,
         },
       }).code(200);
-    } catch {
-      return h.response({
-        status: 'error',
-        message: 'Maaf, terjadi kegagalan pada server kami.',
-      }).code(500);
+    } catch (error) {
+      return catchFunction(error, h);
     }
   }
 
@@ -68,16 +56,13 @@ class AuthHandler {
       this._validator.validateDeleteAuthPayload(request.payload);
       const { refreshToken } = request.payload;
       await this._authService.verifyRefreshToken(refreshToken);
-      await this._authService.deleteRerfreshToken(refreshToken);
+      await this._authService.deleteRefreshToken(refreshToken);
       return h.response({
         status: 'success',
         message: 'Refresh token berhasil dihapus',
       }).code(200);
-    } catch {
-      return h.response({
-        status: 'error',
-        message: 'Maaf, terjadi kegagalan pada server kami.',
-      }).code(500);
+    } catch (error) {
+      return catchFunction(error, h);
     }
   }
 }

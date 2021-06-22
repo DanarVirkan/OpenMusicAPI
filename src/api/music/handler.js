@@ -1,4 +1,4 @@
-const ClientError = require('../../exceptions/ClientError');
+const { catchFunction } = require('../../utils');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 class MusicHandler {
@@ -29,16 +29,7 @@ class MusicHandler {
         },
       }).code(201);
     } catch (error) {
-      if (error instanceof ClientError) {
-        return h.response({
-          status: 'fail',
-          message: 'payload tidak sesuai',
-        }).code(400);
-      }
-      return h.response({
-        status: 'error',
-        message: 'Lagu tidak berhasil ditambahkan',
-      }).code(500);
+      return catchFunction(error, h);
     }
   }
 
@@ -66,16 +57,7 @@ class MusicHandler {
         },
       }).code(200);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        return h.response({
-          status: 'fail',
-          message: error.message,
-        }).code(404);
-      }
-      return h.response({
-        status: 'error',
-        message: 'lagu tidak berhasil didapatkan',
-      }).code(500);
+      return catchFunction(error, h);
     }
   }
 
@@ -94,21 +76,7 @@ class MusicHandler {
         message: 'lagu berhasil diperbarui',
       }).code(200);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        return h.response({
-          status: 'fail',
-          message: error.message,
-        }).code(404);
-      } if (error instanceof ClientError) {
-        return h.response({
-          status: 'fail',
-          message: 'payload tidak sesuai',
-        }).code(400);
-      }
-      return h.response({
-        status: 'error',
-        message: 'lagu tidak berhasil diperbarui',
-      }).code(500);
+      return catchFunction(error, h);
     }
   }
 
@@ -121,16 +89,7 @@ class MusicHandler {
         message: 'lagu berhasil dihapus',
       }).code(200);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        return h.response({
-          status: 'fail',
-          message: error.message,
-        }).code(404);
-      }
-      return h.response({
-        status: 'error',
-        message: 'lagu tidak berhasil dihapus',
-      }).code(500);
+      return catchFunction(error, h);
     }
   }
 }

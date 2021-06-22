@@ -2,6 +2,8 @@ const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const ForbiddenError = require('../../exceptions/ForbiddenError');
+const { mapDBsongsToModel, mapDBplaylistsToModel } = require('../../utils');
 
 class PlaylistService {
   constructor() {
@@ -11,7 +13,7 @@ class PlaylistService {
   async addPlaylist({ name, owner }) {
     const id = `playlist-${nanoid(16)}`;
     const query = {
-      text: 'INSERT INTO playlists ($1,$2,$3) RETURNING id',
+      text: 'INSERT INTO playlists VALUES($1,$2,$3) RETURNING id',
       values: [id, name, owner],
     };
     const result = await this._pool.query(query);
@@ -32,17 +34,17 @@ class PlaylistService {
     }
     const playlist = result.rows[0];
     if (playlist.owner !== owner) {
-      throw new InvariantError('Anda tidak berhak mengakses');
+      throw new ForbiddenError('Anda tidak berhak mengakses');
     }
   }
 
   async getPlaylistByOwner(owner) {
     const query = {
-      text: 'SELECT * FROM playlists WHERE owner = $1',
+      text: 'SELECT playlists.*,music_user.username FROM playlists JOIN music_user ON music_user.id = playlists.owner WHERE playlists.owner = $1',
       values: [owner],
     };
     const result = await this._pool.query(query);
-    return result;
+    return result.rows.map(mapDBplaylistsToModel);
   }
 
   async deletePlaylist(id) {
@@ -70,11 +72,11 @@ class PlaylistService {
 
   async getSongInPlaylist(playlistId) {
     const query = {
-      text: 'SELECT * FROM playlists_songs WHERE playlist_id = $1',
+      text: 'SELECT playlists_songs.song_id AS id,songs.title,songs.performer FROM playlists_songs JOIN songs ON playlists_songs.song_id = songs.id WHERE playlists_songs.playlist_id = $1',
       values: [playlistId],
     };
     const result = await this._pool.query(query);
-    return result;
+    return result.rows.map(mapDBsongsToModel);
   }
 
   async deleteSongInPlaylist({ playlistId, songId }) {
