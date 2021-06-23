@@ -24,16 +24,37 @@ class PlaylistService {
   }
 
   async verifyPlaylistOwner(id, owner) {
-    const query = {
+    const queryOwner = {
       text: 'SELECT * FROM playlists WHERE id = $1',
       values: [id],
     };
-    const result = await this._pool.query(query);
-    if (!result.rowCount) {
+    const resultOwner = await this._pool.query(queryOwner);
+    if (!resultOwner.rowCount) {
       throw new NotFoundError('Playlist not found');
     }
-    const playlist = result.rows[0];
-    if (playlist.owner !== owner) {
+    const playlistOwner = resultOwner.rows[0];
+    if (playlistOwner.owner !== owner) {
+      throw new ForbiddenError('Anda tidak berhak mengakses');
+    }
+  }
+
+  async verifyCollabPlaylist(playlistId, userId) {
+    const queryOwner = {
+      text: 'SELECT * FROM playlists WHERE id = $1',
+      values: [playlistId],
+    };
+    const queryCollaborator = {
+      text: 'SELECT * FROM collaborations WHERE playlist_id = $1 AND user_id = $2',
+      values: [playlistId, userId],
+    };
+    const resultOwner = await this._pool.query(queryOwner);
+    const resultCollab = await this._pool.query(queryCollaborator);
+    if (!resultOwner.rowCount) {
+      throw new NotFoundError('Playlist not found');
+    }
+    const playlistOwner = resultOwner.rows[0];
+    const playlistCollab = resultCollab.rows[0];
+    if (playlistOwner.owner !== userId && (!resultCollab.rowCount || playlistCollab.user_id !== userId)) {
       throw new ForbiddenError('Anda tidak berhak mengakses');
     }
   }
@@ -42,6 +63,15 @@ class PlaylistService {
     const query = {
       text: 'SELECT playlists.*,music_user.username FROM playlists JOIN music_user ON music_user.id = playlists.owner WHERE playlists.owner = $1',
       values: [owner],
+    };
+    const result = await this._pool.query(query);
+    return result.rows.map(mapDBplaylistsToModel);
+  }
+
+  async getPlaylistByCollaborator(collaborator) {
+    const query = {
+      text: 'SELECT collab.playlist_id as id,playlists.name,music_user.username FROM collaborations AS collab JOIN playlists ON playlists.id = collab.playlist_id JOIN music_user ON playlists.owner = music_user.id WHERE collab.user_id = $1',
+      values: [collaborator],
     };
     const result = await this._pool.query(query);
     return result.rows.map(mapDBplaylistsToModel);

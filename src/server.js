@@ -18,11 +18,16 @@ const playlist = require('./api/playlist');
 const PlaylistService = require('./services/database/PlaylistService');
 const PlaylistValidator = require('./validator/playlist');
 
+const collaboration = require('./api/collaboration');
+const CollaborationService = require('./services/database/CollaborationService');
+const CollaborationValidator = require('./validator/collaboration');
+
 const init = async () => {
   const musicService = new MusicService();
   const userService = new UserService();
   const authService = new AuthService();
   const playlistService = new PlaylistService();
+  const collaborationService = new CollaborationService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -79,6 +84,13 @@ const init = async () => {
     options: {
       service: playlistService,
       validator: PlaylistValidator,
+    },
+  }, {
+    plugin: collaboration,
+    options: {
+      collabService: collaborationService,
+      playlistService,
+      validator: CollaborationValidator,
     },
   }]).catch((err) => console.log(err));
 
