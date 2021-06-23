@@ -8,10 +8,13 @@ class AuthService {
 
   async addRefreshToken(token) {
     const query = {
-      text: 'INSERT INTO auth VALUES($1)',
+      text: 'INSERT INTO auth VALUES($1) RETURNING token',
       values: [token],
     };
-    await this._pool.query(query);
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new InvariantError('Gagal login');
+    }
   }
 
   async verifyRefreshToken(token) {
@@ -28,10 +31,13 @@ class AuthService {
   async deleteRefreshToken(token) {
     await this.verifyRefreshToken(token);
     const query = {
-      text: 'DELETE FROM auth WHERE token = $1',
+      text: 'DELETE FROM auth WHERE token = $1 RETURNING token',
       values: [token],
     };
-    await this._pool.query(query);
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new InvariantError('Gagal logout');
+    }
   }
 }
 module.exports = AuthService;

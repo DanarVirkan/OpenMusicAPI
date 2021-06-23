@@ -2,6 +2,7 @@ const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const { mapDBsongsToModel } = require('../../utils');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const InvariantError = require('../../exceptions/InvariantError');
 
 class MusicService {
   constructor() {
@@ -22,6 +23,9 @@ class MusicService {
       values: [id, title, year, performer, genre, duration, createdAt],
     };
     const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new InvariantError('Gagal menambah lagu');
+    }
     return result.rows[0].id;
   }
 
@@ -36,6 +40,9 @@ class MusicService {
       values: [id],
     };
     const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError('id tidak ditemukan');
+    }
     return result.rows[0];
   }
 
