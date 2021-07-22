@@ -1,4 +1,5 @@
 .env
+src/api/uploads/file
 
 # Logs
 logs
